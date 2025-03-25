@@ -1,0 +1,46 @@
+#add to automation via yaml
+alias: Shelly Gen2/Gen3 MQTT Discovery
+description: Auto-discovers Shelly Gen2/Gen3 devices using shellies_discovery_gen2.py
+mode: single
+trigger:
+  - platform: mqtt
+    topic: shellies_discovery/rpc
+
+condition: []
+
+action:
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >
+              {% set p = trigger.payload | default('') %}
+              {{ p is string and p.startswith('{') and '"src"' in p }}
+        sequence:
+          - variables:
+              payload: "{{ trigger.payload | from_json }}"
+          - service: python_script.shellies_discovery_gen2
+            data:
+              id: "{{ payload.src }}"
+              type: "{{ payload.src.split('-')[0] }}"
+              fw_ver: >
+                {% if 'result' in payload and 'sys' in payload.result and 'config' in payload.result.sys and 'fw_id' in payload.result.sys.config %}
+                  {{ payload.result.sys.config.fw_id }}
+                {% else %}
+                  unknown
+                {% endif %}
+              mac: >
+                {% if 'result' in payload and 'sys' in payload.result and 'config' in payload.result.sys and 'mac' in payload.result.sys.config %}
+                  {{ payload.result.sys.config.mac }}
+                {% else %}
+                  unknown
+                {% endif %}
+              device_ids:
+                - shelly1pmg3-3030f9eb7774
+                - shelly1pmg3-3030f9e94028
+                - shelly1pmg3-3030f9e96fa4
+                - shelly1pmg3-3030f9eb4a34
+                - shelly1pmg3-3030f9eb68cc
+                - shelly1pmg3-3030f9e86648
+                - shelly1pmg3-3030f9e965d0
+                - shelly1pmg3-dcda0cb12584
+    default: []
