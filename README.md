@@ -59,7 +59,7 @@ action:
                 {% else %}
                   unknown
                 {% endif %}
-              device_ids:
+              device_ids: #Edit with your devices IDs
                 - shelly1pmg3-3030f9eb7774
                 - shelly1pmg3-3030f9e94028
                 - shelly1pmg3-3030f9e96fa4
